@@ -22,10 +22,11 @@ class NotificationController @Inject()(notificationService: NotificationService)
   }
 
   get("/notifications/:id") {
-    req: Request => notificationService.getNotification(req.params("id")).map({
-      case Some(notification) => SuccessResponse(notification)
-      case _ => FailureResponse(FailureReason.NotFound)
-    })
+    req: Request =>
+      notificationService.getNotification(req.params("id")).map({
+        case Some(notification) => SuccessResponse(notification)
+        case _ => FailureResponse(FailureReason.NotFound)
+      })
   }
 
   get("/notifications/:receiver/receiver") {
@@ -46,5 +47,9 @@ class NotificationController @Inject()(notificationService: NotificationService)
 
   put("/notifications/:receiver/receiver") {
     req: Request => notificationService.markReadAll(req.params("receiver")).map(SuccessResponse)
+  }
+
+  get("/notifications/:receiver/num_unread/:notify_type") {
+    req: Request => notificationService.getNumUnread(req.params("receiver"), req.params.get("notify_type"))
   }
 }
