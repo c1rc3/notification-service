@@ -81,7 +81,7 @@ case class KafkaNotificationService @Inject()(
   override def addNotification(sender: String, receiver: String, notifyType: NotificationType, data: String) = {
     val id = StringUtil.genUniqueId
     val currentMillis = System.currentTimeMillis()
-    val notification = Notification(
+    kafkaProducer.send(s"$topicPrefix-${notifyType.toString.toLowerCase}", KafkaCommand.CREATE.toString, Notification(
       id = id,
       sender = sender,
       receiver = receiver,
@@ -91,8 +91,7 @@ case class KafkaNotificationService @Inject()(
       createdTime = currentMillis,
       updatedTime = currentMillis,
       readTime = 0L,
-    )
-    kafkaProducer.send(s"$topicPrefix-${notifyType.toString.toLowerCase}", id, notification.toJsonString).map(_ => id)
+    ).toJsonString).map(_ => id)
   }
 
   override def getNotification(id: String) = notifyRepo.get(id)

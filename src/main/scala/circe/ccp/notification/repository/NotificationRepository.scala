@@ -11,7 +11,7 @@ import org.elasticsearch.index.query.QueryBuilders
  * Created by phg on 3/14/18.
  **/
 trait NotificationRepository {
-  def add(id: String, source: String): Future[String]
+  def add(id: String, source: Notification): Future[String]
 
   def get(id: String): Future[Option[Notification]]
 
@@ -30,7 +30,7 @@ case class ESNotificationRepository @Inject()(
 
   initIndexFromJsonFile(filePath)
 
-  override def add(id: String, source: String) = es.upsert(typeName, id, source).map(_ => id)
+  override def add(id: String, source: Notification) = es.upsert(typeName, id, source.toJsonString).map(_ => id)
 
   override def get(id: String) = es.get(typeName, id).map(res => {
     if (res.isExists) Some(res.getSourceAsString.asJsonObject[Notification])
