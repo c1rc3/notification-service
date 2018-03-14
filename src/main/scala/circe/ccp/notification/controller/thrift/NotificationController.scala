@@ -31,7 +31,7 @@ class NotificationController @Inject()(notifyService: NotificationService) exten
 
   override def markUnread = handle(MarkUnread) {
     args: MarkUnread.Args => {
-      notifyService.markUnread(args.receiver, args.notificationId)
+      notifyService.markUnread(args.notificationId)
     }
   }
 
@@ -46,8 +46,7 @@ class NotificationController @Inject()(notifyService: NotificationService) exten
       notifyService.getNotifications(
         receiver = args.receiver,
         notifyType = args.notifyType.flatMap(s => NotificationType.forName(s)),
-        pageable = PageNumberRequest(args.page, args.size),
-        sorts = args.sorts.getOrElse(Seq[String]())
+        pageable = PageNumberRequest(args.page, args.size, args.sorts.getOrElse(Seq[String]()).toArray)
       ).map(Page2Thrift)
     }
   }
@@ -58,8 +57,7 @@ class NotificationController @Inject()(notifyService: NotificationService) exten
         receiver = args.receiver,
         notifyType = args.notifyType.flatMap(s => NotificationType.forName(s)),
         isRead = Some(false),
-        pageable = PageNumberRequest(args.page, args.size),
-        sorts = args.sorts.getOrElse(Seq[String]())
+        pageable = PageNumberRequest(args.page, args.size, args.sorts.getOrElse(Seq[String]()).toArray)
       ).map(Page2Thrift)
     }
   }

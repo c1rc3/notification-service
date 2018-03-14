@@ -38,14 +38,17 @@ class NotificationController @Inject()(notificationService: NotificationService)
         req.receiver,
         Some(NotificationType.IN_APP),
         req.isRead,
-        req.getPageable,
-        req.getSorts
+        req.getPageable
       ).map(PagingResponse)
     }
   }
 
   put("/notifications/:id/read") {
     req: Request => notificationService.markRead(req.params("id")).map(SuccessResponse)
+  }
+
+  put("/notifications/:id/unread") {
+    req: Request => notificationService.markUnread(req.params("id")).map(SuccessResponse)
   }
 
   put("/notifications/:receiver/receiver") {
