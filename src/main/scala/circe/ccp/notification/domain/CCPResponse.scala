@@ -51,6 +51,7 @@ object FailureReason extends Enumeration {
   type FailureReason = Value
 
   val NotFound = Value(-404, "not-found")
+  val InvalidNotifyType = Value(-101, "invalid-notification-type")
 }
 
 trait Response {
