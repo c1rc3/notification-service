@@ -12,7 +12,7 @@ trait Cronning extends Logging {
     val thread = new Thread(new Runnable() {
       override def run() = while (true) try {
         fn
-        Thread.sleep(period)
+        if (period > 0) Thread.sleep(period)
       } catch {
         case NonFatal(throwable) => error(s"[ERROR] Cronning.run", throwable)
       }
