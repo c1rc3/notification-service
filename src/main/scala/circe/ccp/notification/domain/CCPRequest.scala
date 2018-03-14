@@ -1,5 +1,7 @@
 package circe.ccp.notification.domain
 
+import circe.ccp.notification.domain.NotificationType.NotificationType
+import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
 import com.twitter.finatra.request.{QueryParam, RouteParam}
 
 /**
@@ -31,7 +33,6 @@ case class AddNotificationRequest(
 case class GetNotificationRequest(
   @RouteParam receiver: String,
   @QueryParam isRead: Option[Boolean] = None,
-  @QueryParam notifyType: Option[String] = None,
   @QueryParam override val page: Int = 1,
   @QueryParam override val size: Int = 10,
   @QueryParam override val sorts: Option[String] = None
