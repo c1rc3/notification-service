@@ -35,7 +35,9 @@ abstract class NotificationConsumer(
           case NonFatal(throwable) => error("NotificationConsumer.consume.UPDATE", throwable)
             throw throwable
         }
+        case _ => info(s"Unsupported ${cmd.toString}")
       }
+      case _ => info(s"Unsupported ${record.key()}")
     }
 
   }

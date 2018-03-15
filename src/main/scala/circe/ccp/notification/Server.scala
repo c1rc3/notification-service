@@ -1,7 +1,7 @@
 package circe.ccp.notification
 
 
-import circe.ccp.notification.consumer.{EmailNotificationDeliverer, NotificationWriter}
+import circe.ccp.notification.consumer.{EmailNotificationDeliverer, NotificationWriter, PushNotificationDeliverer}
 import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.filters.CommonFilters
 import com.twitter.finatra.http.routing.HttpRouter
@@ -47,5 +47,6 @@ class Server extends HttpServer with ThriftServer {
 
     injector.instance[NotificationWriter].startConsume()
     injector.instance[EmailNotificationDeliverer].startConsume()
+    injector.instance[PushNotificationDeliverer].startConsume()
   }
 }
