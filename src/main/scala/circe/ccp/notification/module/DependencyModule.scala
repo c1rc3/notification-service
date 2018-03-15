@@ -20,6 +20,9 @@ object DependencyModule extends TwitterModule {
     bind[String].annotatedWithName("notification-type-name").toInstance("")
     bind[String].annotatedWithName("notification-topic-prefix").toInstance("")
     bind[String].annotatedWithName("notification-mapping-file").toInstance("")
+    bind[String].annotatedWithName("one-signal-id").toInstance("")
+    bind[String].annotatedWithName("one-signal-key").toInstance("")
+
 
     bind[Config].annotatedWithName("email-notification-consumer-config").toInstance(ZConfig.getConf(""))
     bind[Config].annotatedWithName("notification-writer-config").toInstance(ZConfig.getConf(""))
@@ -31,8 +34,8 @@ object DependencyModule extends TwitterModule {
 
   @Provides
   @Singleton
-  def providesCoinInfoESClient: ElasticsearchRepository = {
-    val config = ZConfig.getConf("coin-info")
+  def providesESClient: ElasticsearchRepository = {
+    val config = ZConfig.getConf("notification")
     ElasticsearchRepository(
       config.getStringList("es.servers").toList,
       config.getString("es.cluster"),
