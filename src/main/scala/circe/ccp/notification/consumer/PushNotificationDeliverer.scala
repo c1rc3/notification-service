@@ -45,7 +45,7 @@ class PushNotificationDeliverer @Inject()(
     ).toJsonString)
   }
 
-  private def send(body: String): Unit = Http(oneSignalUrl)
+  private def send(body: String): Unit = Http(s"$oneSignalUrl/notifications")
     .header("Content-Type", "application/json; charset=utf-8")
     .header("Authorization", s"Basic $oneSignalKey")
     .postData(body).asString
