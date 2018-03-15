@@ -9,7 +9,7 @@ import scala.collection.JavaConversions._
  * Created by phg on 3/12/18.
  **/
 
-object ZConfig extends ZConfig(s"conf/${System.getProperty("mode", "development")}.conf")
+object ZConfig extends ZConfig(s"conf/${System.getProperty("mode", "local")}.conf")
 
 case class ZConfig(filePath: String) {
 

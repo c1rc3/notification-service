@@ -17,13 +17,13 @@ object DependencyModule extends TwitterModule {
   override def configure(): Unit = {
     super.configure()
 
-    bind[String].annotatedWithName("notification-type-name").toInstance("notification.es.type-name")
-    bind[String].annotatedWithName("notification-topic-prefix").toInstance("notification.topic-prefix")
-    bind[String].annotatedWithName("notification-mapping-file").toInstance("notification.es.mapping-file")
+    bind[String].annotatedWithName("notification-type-name").toInstance(ZConfig.getString("notification.es.type-name"))
+    bind[String].annotatedWithName("notification-topic-prefix").toInstance(ZConfig.getString("notification.topic-prefix"))
+    bind[String].annotatedWithName("notification-mapping-file").toInstance(ZConfig.getString("notification.es.mapping-file"))
 
-    bind[String].annotatedWithName("one-signal-url").toInstance("one-signal.url")
-    bind[String].annotatedWithName("one-signal-id").toInstance("one-signal.id")
-    bind[String].annotatedWithName("one-signal-key").toInstance("one-signal.key")
+    bind[String].annotatedWithName("one-signal-url").toInstance(ZConfig.getString("one-signal.url"))
+    bind[String].annotatedWithName("one-signal-id").toInstance(ZConfig.getString("one-signal.id"))
+    bind[String].annotatedWithName("one-signal-key").toInstance(ZConfig.getString("one-signal.key"))
 
     bind[Config].annotatedWithName("push-notification-consumer-config").toInstance(ZConfig.getConf("notification.kafka.consumers.push"))
     bind[Config].annotatedWithName("email-notification-consumer-config").toInstance(ZConfig.getConf("notification.kafka.consumers.email"))
