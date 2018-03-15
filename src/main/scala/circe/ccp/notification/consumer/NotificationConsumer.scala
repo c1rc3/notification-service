@@ -21,16 +21,19 @@ abstract class NotificationConsumer(
           handleCreate(record.value.asJsonObject[Notification])
         } catch {
           case NonFatal(throwable) => error("NotificationConsumer.consume.CREATE", throwable)
+            throw throwable
         }
         case KafkaCommand.UPDATE => try {
           handleUpdate(record.value.asJsonObject[Notification])
         } catch {
           case NonFatal(throwable) => error("NotificationConsumer.consume.UPDATE", throwable)
+            throw throwable
         }
         case KafkaCommand.DELETE => try {
           handleDelete(record.value.asJsonObject[Notification].id)
         } catch {
           case NonFatal(throwable) => error("NotificationConsumer.consume.UPDATE", throwable)
+            throw throwable
         }
       }
     }

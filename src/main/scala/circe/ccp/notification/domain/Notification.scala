@@ -32,3 +32,15 @@ object NotificationType extends Enumeration {
 }
 
 class TNotificationType extends TypeReference[NotificationType.type]
+
+case class EmailNotificationInfo(
+  to: Array[String],
+  cc: Array[String],
+  bcc: Array[String],
+  subject: String,
+  body: String
+)
+
+case class PushNotificationInfo(
+  message: String
+)
