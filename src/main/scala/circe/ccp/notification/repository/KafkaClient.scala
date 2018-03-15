@@ -51,7 +51,9 @@ trait KafkaConsumer[K, V] extends Cronning {
 
   protected def pollTimeout: Long = 1000L
 
+
   private val consumer = KafkaConsumer[K, V](KafkaConsumer.Conf(consumerConfig, keyDeserializer, valueDeserializer))
+  consumer.subscribe(consumerConfig.getStringList("topics"))
 
   private var isRunning = false
   private def _start(): Unit = this.synchronized {

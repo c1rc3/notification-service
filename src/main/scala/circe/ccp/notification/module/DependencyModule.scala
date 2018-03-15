@@ -2,7 +2,7 @@ package circe.ccp.notification.module
 
 import javax.inject.Singleton
 
-import circe.ccp.notification.repository.{ESNotificationRepository, ElasticsearchRepository, NotificationRepository}
+import circe.ccp.notification.repository.{ESNotificationRepository, ElasticsearchRepository, NotificationRepository, StringKafkaProducer}
 import circe.ccp.notification.service.{FakedNotificationService, NotificationService}
 import circe.ccp.notification.util.ZConfig
 import com.google.inject.Provides
@@ -17,16 +17,18 @@ object DependencyModule extends TwitterModule {
   override def configure(): Unit = {
     super.configure()
 
-    bind[String].annotatedWithName("notification-type-name").toInstance("")
-    bind[String].annotatedWithName("notification-topic-prefix").toInstance("")
-    bind[String].annotatedWithName("notification-mapping-file").toInstance("")
-    bind[String].annotatedWithName("one-signal-id").toInstance("")
-    bind[String].annotatedWithName("one-signal-key").toInstance("")
+    bind[String].annotatedWithName("notification-type-name").toInstance("notification.es.type-name")
+    bind[String].annotatedWithName("notification-topic-prefix").toInstance("notification.topic-prefix")
+    bind[String].annotatedWithName("notification-mapping-file").toInstance("notification.es.mapping-file")
 
+    bind[String].annotatedWithName("one-signal-url").toInstance("one-signal.url")
+    bind[String].annotatedWithName("one-signal-id").toInstance("one-signal.id")
+    bind[String].annotatedWithName("one-signal-key").toInstance("one-signal.key")
 
-    bind[Config].annotatedWithName("email-notification-consumer-config").toInstance(ZConfig.getConf(""))
-    bind[Config].annotatedWithName("notification-writer-config").toInstance(ZConfig.getConf(""))
-    bind[Config].annotatedWithName("smtp-config").toInstance(ZConfig.getConf(""))
+    bind[Config].annotatedWithName("push-notification-consumer-config").toInstance(ZConfig.getConf("notification.consumers.push"))
+    bind[Config].annotatedWithName("email-notification-consumer-config").toInstance(ZConfig.getConf("notification.consumers.email"))
+    bind[Config].annotatedWithName("notification-writer-config").toInstance(ZConfig.getConf("notification.consumers.writer"))
+    bind[Config].annotatedWithName("smtp-config").toInstance(ZConfig.getConf("smtp"))
 
     bind[NotificationRepository].to[ESNotificationRepository]
     bind[NotificationService].to[FakedNotificationService]
@@ -43,5 +45,9 @@ object DependencyModule extends TwitterModule {
       config.getString("es.index-name")
     )
   }
+
+  @Provides
+  @Singleton
+  def providesNotifyKafkaProducer: StringKafkaProducer = StringKafkaProducer(ZConfig.getConf("notification.kafka.producer"))
 
 }
