@@ -3,6 +3,7 @@ package circe.ccp.notification.consumer
 import circe.ccp.notification.domain.{KafkaCommand, Notification}
 import circe.ccp.notification.repository.StringKafkaConsumer
 import circe.ccp.notification.util.Jsoning
+import com.twitter.inject.Logging
 import com.twitter.util.NonFatal
 import com.typesafe.config.Config
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -11,8 +12,9 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
  * Created by phg on 3/14/18.
  **/
 abstract class NotificationConsumer(
-  consumerConfig: Config
-) extends StringKafkaConsumer(consumerConfig) with Jsoning {
+  consumerConfig: Config,
+  topics: Seq[String]
+) extends StringKafkaConsumer(consumerConfig, topics) with Jsoning with Logging {
 
   override def consume(record: ConsumerRecord[String, String]): Unit = {
     KafkaCommand.forName(record.key) match {

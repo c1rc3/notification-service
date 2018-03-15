@@ -3,6 +3,7 @@ package circe.ccp.notification.repository
 import cakesolutions.kafka.{KafkaConsumer, KafkaProducer}
 import circe.ccp.notification.util.Cronning
 import circe.ccp.notification.util.TwitterConverters._
+import com.twitter.inject.Logging
 import com.twitter.util.{Future, NonFatal}
 import com.typesafe.config.Config
 import org.apache.kafka.clients.consumer.{ConsumerRecord, OffsetAndMetadata}
@@ -19,7 +20,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
  * Created by phg on 3/13/18.
  **/
 
-trait KafkaPublisher[K, V] {
+trait KafkaPublisher[K, V] extends Logging {
   protected def keySerializer: Serializer[K]
 
   protected def valueSerializer: Serializer[V]
@@ -29,8 +30,9 @@ trait KafkaPublisher[K, V] {
   private val producer = KafkaProducer(KafkaProducer.Conf(producerConfig, keySerializer, valueSerializer))
 
   def send(topic: String, key: K, value: V, partition: java.lang.Integer = null, timestamp: java.lang.Long = null)
-    (implicit ec: ExecutionContext = global): Future[RecordMetadata] =
+    (implicit ec: ExecutionContext = global): Future[RecordMetadata] = {
     producer.send(new ProducerRecord[K, V](topic, partition, timestamp, key, value))
+  }
 }
 
 case class StringKafkaProducer(producerConfig: Config) extends KafkaPublisher[String, String] {
@@ -47,13 +49,15 @@ trait KafkaSubscriber[K, V] extends Cronning {
 
   protected def consumerConfig: Config
 
+  protected def topics: Seq[String]
+
   protected def retryWhenFail: Boolean = true
 
   protected def pollTimeout: Long = 1000L
 
 
   private val consumer = KafkaConsumer[K, V](KafkaConsumer.Conf(consumerConfig, keyDeserializer, valueDeserializer))
-  consumer.subscribe(consumerConfig.getStringList("topics"))
+  consumer.subscribe(topics)
 
   private var isRunning = false
   private def _start(): Unit = this.synchronized {
@@ -90,11 +94,12 @@ trait KafkaSubscriber[K, V] extends Cronning {
   def consume(record: ConsumerRecord[K, V]): Unit
 }
 
-abstract class StringKafkaConsumer(config: Config) extends KafkaSubscriber[String, String] {
+abstract class StringKafkaConsumer(config: Config, topics: Seq[String]) extends KafkaSubscriber[String, String] {
 
   override def consumerConfig: Config = config
 
   override protected def keyDeserializer: Deserializer[String] = new StringDeserializer()
 
   override protected def valueDeserializer: Deserializer[String] = new StringDeserializer()
+
 }
