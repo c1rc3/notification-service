@@ -7,6 +7,7 @@ import circe.ccp.notification.service.{FakedNotificationService, NotificationSer
 import circe.ccp.notification.util.ZConfig
 import com.google.inject.Provides
 import com.twitter.inject.TwitterModule
+import com.typesafe.config.Config
 
 import scala.collection.JavaConversions._
 /**
@@ -19,6 +20,10 @@ object DependencyModule extends TwitterModule {
     bind[String].annotatedWithName("notification-type-name").toInstance("")
     bind[String].annotatedWithName("notification-topic-prefix").toInstance("")
     bind[String].annotatedWithName("notification-mapping-file").toInstance("")
+
+    bind[Config].annotatedWithName("email-notification-consumer-config").toInstance(ZConfig.getConf(""))
+    bind[Config].annotatedWithName("notification-writer-config").toInstance(ZConfig.getConf(""))
+    bind[Config].annotatedWithName("smtp-config").toInstance(ZConfig.getConf(""))
 
     bind[NotificationRepository].to[ESNotificationRepository]
     bind[NotificationService].to[FakedNotificationService]

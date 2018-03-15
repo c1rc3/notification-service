@@ -19,6 +19,13 @@
         <mainClass>circe.ccp.notification.MainApp</mainClass>
     </properties>
     <dependencies>
+
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.7</version>
+        </dependency>
+
         <!-- Elasticsearch -->
         <dependency>
             <groupId>org.elasticsearch</groupId>
