@@ -22,7 +22,7 @@ case class EmailNotificationDeliverer @Inject()(
 
   private def properties = {
     val props = new Properties()
-    smtpConfig.entrySet().foreach(entry => props.put(entry.getKey, entry.getValue.render(ConfigRenderOptions.concise())))
+    smtpConfig.entrySet().foreach(entry => props.put(entry.getKey, entry.getValue.unwrapped().toString))
     props
   }
 
