@@ -82,7 +82,7 @@ case class KafkaNotificationService @Inject()(
   override def addNotification(sender: String, receiver: String, notifyType: NotificationType, data: String) = {
     val id = StringUtil.genUniqueId
     val currentMillis = System.currentTimeMillis()
-    kafkaProducer.send("lbt-orders-dev",//s"$topicPrefix-${notifyType.toString.toLowerCase}",
+    kafkaProducer.send(s"$topicPrefix-${notifyType.toString.toLowerCase}",
       KafkaCommand.CREATE.toString, Notification(
       id = id,
       sender = sender,
