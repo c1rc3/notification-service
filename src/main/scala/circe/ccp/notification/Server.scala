@@ -1,12 +1,12 @@
 package circe.ccp.notification
 
 
+import circe.ccp.notification.consumer.{EmailNotificationDeliverer, NotificationWriter}
 import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.filters.CommonFilters
 import com.twitter.finatra.http.routing.HttpRouter
 import com.twitter.finatra.thrift.ThriftServer
 import com.twitter.finatra.thrift.routing.ThriftRouter
-
 import circe.ccp.notification.module.DependencyModule
 import circe.ccp.notification.controller.http.exception.CommonExceptionMapper
 import circe.ccp.notification.controller.http.filter.CORSFilter
@@ -40,5 +40,12 @@ class Server extends HttpServer with ThriftServer {
   override protected def configureThrift(router: ThriftRouter): Unit = {
     router
       .add[thrift.NotificationController]
+  }
+
+  override def afterPostWarmup(): Unit = {
+    super.afterPostWarmup()
+
+    injector.instance[NotificationWriter].startConsume()
+    injector.instance[EmailNotificationDeliverer].startConsume()
   }
 }

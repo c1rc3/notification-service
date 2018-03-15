@@ -54,11 +54,11 @@ trait KafkaConsumer[K, V] extends Cronning {
   private val consumer = KafkaConsumer[K, V](KafkaConsumer.Conf(consumerConfig, keyDeserializer, valueDeserializer))
 
   private var isRunning = false
-  private def _start() = {
+  private def _start(): Unit = this.synchronized {
     if (isRunning) return
     isRunning = true
     run(0) {
-      var offsets: Map[TopicPartition, OffsetAndMetadata] = _
+      var offsets: Map[TopicPartition, OffsetAndMetadata] = Map()
       try {
         val records = consumer.poll(pollTimeout)
         offsets = Map[TopicPartition, OffsetAndMetadata]()
@@ -83,9 +83,7 @@ trait KafkaConsumer[K, V] extends Cronning {
     }
   }
 
-  def startConsume() = this.synchronized {
-    _start()
-  }
+  def startConsume() = _start()
 
   def consume(record: ConsumerRecord[K, V]): Unit
 }
