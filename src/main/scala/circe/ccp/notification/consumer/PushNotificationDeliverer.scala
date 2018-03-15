@@ -14,7 +14,7 @@ class PushNotificationDeliverer @Inject()(
   @Named("push-notification-consumer-config") config: Config,
   @Named("one-signal-url") oneSignalUrl: String,
   @Named("one-signal-id") oneSignalId: String,
-  @Named("one-signal-key") oneSignalKey: String,
+  @Named("one-signal-key") oneSignalKey: String
 ) extends NotificationConsumer(config) {
 
   override def handleCreate(notification: Notification): Unit = {

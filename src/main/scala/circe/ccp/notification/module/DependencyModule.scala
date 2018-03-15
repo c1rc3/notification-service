@@ -25,9 +25,9 @@ object DependencyModule extends TwitterModule {
     bind[String].annotatedWithName("one-signal-id").toInstance("one-signal.id")
     bind[String].annotatedWithName("one-signal-key").toInstance("one-signal.key")
 
-    bind[Config].annotatedWithName("push-notification-consumer-config").toInstance(ZConfig.getConf("notification.consumers.push"))
-    bind[Config].annotatedWithName("email-notification-consumer-config").toInstance(ZConfig.getConf("notification.consumers.email"))
-    bind[Config].annotatedWithName("notification-writer-config").toInstance(ZConfig.getConf("notification.consumers.writer"))
+    bind[Config].annotatedWithName("push-notification-consumer-config").toInstance(ZConfig.getConf("notification.kafka.consumers.push"))
+    bind[Config].annotatedWithName("email-notification-consumer-config").toInstance(ZConfig.getConf("notification.kafka.consumers.email"))
+    bind[Config].annotatedWithName("notification-writer-config").toInstance(ZConfig.getConf("notification.kafka.consumers.writer"))
     bind[Config].annotatedWithName("smtp-config").toInstance(ZConfig.getConf("smtp"))
 
     bind[NotificationRepository].to[ESNotificationRepository]

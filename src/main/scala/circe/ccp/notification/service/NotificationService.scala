@@ -90,7 +90,7 @@ case class KafkaNotificationService @Inject()(
       isRead = false,
       createdTime = currentMillis,
       updatedTime = currentMillis,
-      readTime = 0L,
+      readTime = 0L
     ).toJsonString).map(_ => id)
   }
 

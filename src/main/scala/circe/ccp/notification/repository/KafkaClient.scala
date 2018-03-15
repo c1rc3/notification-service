@@ -19,7 +19,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
  * Created by phg on 3/13/18.
  **/
 
-trait KafkaProducer[K, V] {
+trait KafkaPublisher[K, V] {
   protected def keySerializer: Serializer[K]
 
   protected def valueSerializer: Serializer[V]
@@ -33,14 +33,14 @@ trait KafkaProducer[K, V] {
     producer.send(new ProducerRecord[K, V](topic, partition, timestamp, key, value))
 }
 
-case class StringKafkaProducer(producerConfig: Config) extends KafkaProducer[String, String] {
+case class StringKafkaProducer(producerConfig: Config) extends KafkaPublisher[String, String] {
 
   override protected def keySerializer: Serializer[String] = new StringSerializer()
 
   override protected def valueSerializer: Serializer[String] = new StringSerializer()
 }
 
-trait KafkaConsumer[K, V] extends Cronning {
+trait KafkaSubscriber[K, V] extends Cronning {
   protected def keyDeserializer: Deserializer[K]
 
   protected def valueDeserializer: Deserializer[V]
@@ -74,7 +74,7 @@ trait KafkaConsumer[K, V] extends Cronning {
           }
         }
       } catch {
-        case ex: AuthorizationException | InvalidOffsetException => error("KafkaConsumer.poll", ex)
+        case ex @(_: AuthorizationException | _: InvalidOffsetException) => error("KafkaConsumer.poll", ex)
           Thread.currentThread().interrupt()
 
         case NonFatal(throwable) => error("KafkaConsumer.poll", throwable) // ignore others exception when poll & retry
@@ -90,7 +90,7 @@ trait KafkaConsumer[K, V] extends Cronning {
   def consume(record: ConsumerRecord[K, V]): Unit
 }
 
-abstract class StringKafkaConsumer(config: Config) extends KafkaConsumer[String, String] {
+abstract class StringKafkaConsumer(config: Config) extends KafkaSubscriber[String, String] {
 
   override def consumerConfig: Config = config
 
