@@ -6,6 +6,7 @@ import circe.ccp.notification.repository.{NotificationRepository, StringKafkaPro
 import circe.ccp.notification.util.{Jsoning, StringUtil}
 import com.google.inject.Inject
 import com.google.inject.name.Named
+import com.twitter.inject.Logging
 import com.twitter.util.Future
 
 /**
@@ -76,12 +77,13 @@ case class KafkaNotificationService @Inject()(
   kafkaProducer: StringKafkaProducer,
   @Named("notification-topic-prefix") topicPrefix: String,
   notifyRepo: NotificationRepository
-) extends NotificationService with Jsoning {
+) extends NotificationService with Jsoning with Logging {
 
   override def addNotification(sender: String, receiver: String, notifyType: NotificationType, data: String) = {
     val id = StringUtil.genUniqueId
     val currentMillis = System.currentTimeMillis()
-    kafkaProducer.send(s"$topicPrefix-${notifyType.toString.toLowerCase}", KafkaCommand.CREATE.toString, Notification(
+    kafkaProducer.send("lbt-orders-dev",//s"$topicPrefix-${notifyType.toString.toLowerCase}",
+      KafkaCommand.CREATE.toString, Notification(
       id = id,
       sender = sender,
       receiver = receiver,
@@ -91,7 +93,10 @@ case class KafkaNotificationService @Inject()(
       createdTime = currentMillis,
       updatedTime = currentMillis,
       readTime = 0L
-    ).toJsonString).map(_ => id)
+    ).toJsonString).map(record => {
+      info(s"Produce ${record.topic} -${record.partition()} - ${record.offset()}")
+      id
+    })
   }
 
   override def getNotification(id: String) = notifyRepo.get(id)

@@ -7,7 +7,7 @@ import javax.mail.internet.{InternetAddress, MimeMessage}
 import circe.ccp.notification.domain.{EmailNotificationInfo, Notification}
 import com.google.inject.Inject
 import com.google.inject.name.Named
-import com.typesafe.config.{Config, ConfigRenderOptions}
+import com.typesafe.config.Config
 
 import scala.collection.JavaConversions._
 import scala.language.implicitConversions
@@ -17,8 +17,9 @@ import scala.language.implicitConversions
  **/
 case class EmailNotificationDeliverer @Inject()(
   @Named("email-notification-consumer-config") config: Config,
-  @Named("smtp-config") smtpConfig: Config
-) extends NotificationConsumer(config) {
+  @Named("smtp-config") smtpConfig: Config,
+  @Named("email-consume-topic") topics: Seq[String]
+) extends NotificationConsumer(config, topics) {
 
   private def properties = {
     val props = new Properties()
@@ -37,20 +38,21 @@ case class EmailNotificationDeliverer @Inject()(
   implicit def S2IA(s: String): InternetAddress = new InternetAddress(s)
 
   override def handleCreate(notification: Notification): Unit = {
-    val info = notification.data.asJsonObject[EmailNotificationInfo]
+    val emailInfo = notification.data.asJsonObject[EmailNotificationInfo]
 
     val msg = new MimeMessage(Session.getInstance(properties, authenticator))
 
     msg.setFrom(notification.sender)
 
     msg.addRecipient(Message.RecipientType.TO, notification.receiver)
-    info.to.foreach(msg.addRecipient(Message.RecipientType.TO, _))
-    info.cc.foreach(msg.addRecipient(Message.RecipientType.CC, _))
-    info.bcc.foreach(msg.addRecipient(Message.RecipientType.BCC, _))
+    emailInfo.to.foreach(msg.addRecipient(Message.RecipientType.TO, _))
+    emailInfo.cc.foreach(msg.addRecipient(Message.RecipientType.CC, _))
+    emailInfo.bcc.foreach(msg.addRecipient(Message.RecipientType.BCC, _))
 
-    msg.setSubject(info.subject, "UTF-8")
-    msg.setText(info.body, "UTF-8", "html")
+    msg.setSubject(emailInfo.subject, "UTF-8")
+    msg.setText(emailInfo.body, "UTF-8", "html")
 
     Transport.send(msg)
+    info(s"Sent ${emailInfo.body}")
   }
 }

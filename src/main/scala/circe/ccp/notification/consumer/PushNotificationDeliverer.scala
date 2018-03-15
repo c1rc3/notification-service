@@ -10,12 +10,13 @@ import scalaj.http.Http
 /**
  * Created by phg on 3/15/18.
  **/
-class PushNotificationDeliverer @Inject()(
+case class PushNotificationDeliverer @Inject()(
   @Named("push-notification-consumer-config") config: Config,
   @Named("one-signal-url") oneSignalUrl: String,
   @Named("one-signal-id") oneSignalId: String,
-  @Named("one-signal-key") oneSignalKey: String
-) extends NotificationConsumer(config) {
+  @Named("one-signal-key") oneSignalKey: String,
+  @Named("push-consume-topic") topics: Seq[String]
+) extends NotificationConsumer(config, topics) {
 
   override def handleCreate(notification: Notification): Unit = {
     val info = notification.data.asJsonObject[PushNotificationInfo]
@@ -45,8 +46,12 @@ class PushNotificationDeliverer @Inject()(
     ).toJsonString)
   }
 
-  private def send(body: String): Unit = Http(s"$oneSignalUrl/notifications")
-    .header("Content-Type", "application/json; charset=utf-8")
-    .header("Authorization", s"Basic $oneSignalKey")
-    .postData(body).asString
+  private def send(body: String): Unit = {
+    Http(s"$oneSignalUrl/notifications")
+      .header("Content-Type", "application/json; charset=utf-8")
+      .header("Authorization", s"Basic $oneSignalKey")
+      .postData(body).asString
+    info(s"Sent $body")
+  }
+
 }

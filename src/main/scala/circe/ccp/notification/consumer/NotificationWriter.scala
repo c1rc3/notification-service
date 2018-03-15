@@ -11,8 +11,9 @@ import com.typesafe.config.Config
  **/
 case class NotificationWriter @Inject()(
   @Named("notification-writer-config") consumeConfig: Config,
-  notifyRepo: NotificationRepository
-) extends NotificationConsumer(consumeConfig) {
+  notifyRepo: NotificationRepository,
+  @Named("writer-consume-topic") topics: Seq[String]
+) extends NotificationConsumer(consumeConfig, topics) {
 
   override def handleCreate(notification: Notification): Unit = {
     notifyRepo.add(notification.id, notification)
