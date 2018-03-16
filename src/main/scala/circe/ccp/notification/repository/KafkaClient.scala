@@ -11,10 +11,10 @@ import org.apache.kafka.clients.producer.{ProducerRecord, RecordMetadata}
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.errors.{AuthorizationException, InvalidOffsetException}
 import org.apache.kafka.common.serialization.{Deserializer, Serializer, StringDeserializer, StringSerializer}
-
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
+
 
 /**
  * Created by phg on 3/13/18.
@@ -33,6 +33,7 @@ trait KafkaPublisher[K, V] extends Logging {
     (implicit ec: ExecutionContext = global): Future[RecordMetadata] = {
     producer.send(new ProducerRecord[K, V](topic, partition, timestamp, key, value))
   }
+
 }
 
 case class StringKafkaProducer(producerConfig: Config) extends KafkaPublisher[String, String] {
@@ -60,31 +61,37 @@ trait KafkaSubscriber[K, V] extends Cronning {
   consumer.subscribe(topics)
 
   private var isRunning = false
+
   private def _start(): Unit = this.synchronized {
     if (isRunning) return
     isRunning = true
+    info(s"Begin consume $topics")
     run(0) {
       var offsets: Map[TopicPartition, OffsetAndMetadata] = Map()
       try {
         val records = consumer.poll(pollTimeout)
-        offsets = Map[TopicPartition, OffsetAndMetadata]()
-        for (record: ConsumerRecord[K, V] <- records) {
-          try {
-            consume(record)
-            offsets = offsets + (new TopicPartition(record.topic(), record.partition()) -> new OffsetAndMetadata(record.offset()))
-            info(s"Consumed ${record.topic()} - ${record.key()} - ${record.offset()}")
-          } catch {
-            case NonFatal(throwable) => if (retryWhenFail) throw throwable
+        if (records.nonEmpty) {
+          for (record: ConsumerRecord[K, V] <- records) {
+            try {
+              consume(record)
+              offsets = offsets + (new TopicPartition(record.topic(), record.partition()) -> new OffsetAndMetadata(record.offset() + 1))
+              info(s"Consumed ${record.topic()} - ${record.key()} - ${record.offset()}")
+            } catch {
+              case NonFatal(throwable) => if (retryWhenFail) throw throwable
+            }
           }
         }
       } catch {
-        case ex @(_: AuthorizationException | _: InvalidOffsetException) => error("KafkaConsumer.poll", ex)
+        case ex@(_: AuthorizationException | _: InvalidOffsetException) => error("KafkaConsumer.poll", ex)
           Thread.currentThread().interrupt()
 
         case NonFatal(throwable) => error("KafkaConsumer.poll", throwable) // ignore others exception when poll & retry
           Thread.sleep(1000)
       } finally {
-        if (offsets.nonEmpty) consumer.commitSync(offsets)
+        if (offsets.nonEmpty) {
+          consumer.commitSync(offsets)
+          info(s"Commit $offsets")
+        }
       }
     }
   }

@@ -45,8 +45,8 @@ class Server extends HttpServer with ThriftServer {
   override def afterPostWarmup(): Unit = {
     super.afterPostWarmup()
 
-//    injector.instance[NotificationWriter].startConsume()
-//    injector.instance[EmailNotificationDeliverer].startConsume()
-//    injector.instance[PushNotificationDeliverer].startConsume()
+    injector.instance[NotificationWriter].startConsume()
+    injector.instance[EmailNotificationDeliverer].startConsume()
+    injector.instance[PushNotificationDeliverer].startConsume()
   }
 }
