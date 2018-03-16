@@ -47,11 +47,11 @@ case class PushNotificationDeliverer @Inject()(
   }
 
   private def send(body: String): Unit = {
-    Http(s"$oneSignalUrl/notifications")
+    val res = Http(s"$oneSignalUrl/notifications")
       .header("Content-Type", "application/json; charset=utf-8")
       .header("Authorization", s"Basic $oneSignalKey")
       .postData(body).asString
-    info(s"Sent $body")
+    info(s"Sent $body \n With response $res")
   }
 
 }
