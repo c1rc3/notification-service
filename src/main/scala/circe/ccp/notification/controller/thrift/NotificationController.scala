@@ -2,7 +2,7 @@ package circe.ccp.notification.controller.thrift
 
 import javax.inject.Inject
 
-import circe.ccp.notification.domain.{Notification, Page, PageNumberRequest}
+import circe.ccp.notification.domain.{Notification, NotificationType, Page, PageNumberRequest}
 import circe.ccp.notification.service.NotificationService
 import circe.cpp.notification.TNotificationService._
 import circe.cpp.notification._
@@ -17,7 +17,7 @@ class NotificationController @Inject()(notifyService: NotificationService) exten
       notifyService.addNotification(
         sender = args.sender,
         receiver = args.receiver,
-        notifyType = args.notifyType,
+        notifyType = NotificationType.forName(args.notifyType).get,
         data = args.data
       )
     }
@@ -31,7 +31,7 @@ class NotificationController @Inject()(notifyService: NotificationService) exten
 
   override def markUnread = handle(MarkUnread) {
     args: MarkUnread.Args => {
-      notifyService.markUnread(args.receiver, args.notificationId)
+      notifyService.markUnread(args.notificationId)
     }
   }
 
@@ -45,9 +45,8 @@ class NotificationController @Inject()(notifyService: NotificationService) exten
     args: GetNotifications.Args => {
       notifyService.getNotifications(
         receiver = args.receiver,
-        notifyType = args.notifyType,
-        pageable = PageNumberRequest(args.page, args.size),
-        sorts = args.sorts.getOrElse(Seq[String]())
+        notifyType = args.notifyType.flatMap(s => NotificationType.forName(s)),
+        pageable = PageNumberRequest(args.page, args.size, args.sorts.getOrElse(Seq[String]()).toArray)
       ).map(Page2Thrift)
     }
   }
@@ -56,17 +55,16 @@ class NotificationController @Inject()(notifyService: NotificationService) exten
     args: GetUnRead.Args => {
       notifyService.getNotifications(
         receiver = args.receiver,
-        notifyType = args.notifyType,
+        notifyType = args.notifyType.flatMap(s => NotificationType.forName(s)),
         isRead = Some(false),
-        pageable = PageNumberRequest(args.page, args.size),
-        sorts = args.sorts.getOrElse(Seq[String]())
+        pageable = PageNumberRequest(args.page, args.size, args.sorts.getOrElse(Seq[String]()).toArray)
       ).map(Page2Thrift)
     }
   }
 
   override def numUnread = handle(NumUnread) {
     args: NumUnread.Args => {
-      notifyService.getNumUnread(args.receiver, args.notifyType)
+      notifyService.getNumUnread(args.receiver, args.notifyType.flatMap(s => NotificationType.forName(s)))
     }
   }
 
@@ -81,7 +79,7 @@ class NotificationController @Inject()(notifyService: NotificationService) exten
     id = n.id,
     sender = n.sender,
     receiver = n.receiver,
-    notifyType = n.notifyType,
+    notifyType = n.notifyType.toString,
     data = n.data,
     isRead = n.isRead,
     createdTime = n.createdTime,
