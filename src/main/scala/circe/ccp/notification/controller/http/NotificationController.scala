@@ -13,12 +13,15 @@ class NotificationController @Inject()(notificationService: NotificationService)
 
   post("/notifications") {
     req: AddNotificationRequest =>
-      notificationService.addNotification(
-        req.sender,
-        req.receiver,
-        req.notifyType,
-        req.data
-      ).map(SuccessResponse)
+      NotificationType.forName(req.notifyType) match {
+        case Some(notifyType) => notificationService.addNotification(
+          req.sender,
+          req.receiver,
+          notifyType,
+          req.data
+        ).map(SuccessResponse)
+        case _ => response.ok(FailureResponse(FailureReason.InvalidNotifyType))
+      }
   }
 
   get("/notifications/:id") {
@@ -33,10 +36,9 @@ class NotificationController @Inject()(notificationService: NotificationService)
     req: GetNotificationRequest => {
       notificationService.getNotifications(
         req.receiver,
+        Some(NotificationType.IN_APP),
         req.isRead,
-        req.notifyType,
-        req.getPageable,
-        req.getSorts
+        req.getPageable
       ).map(PagingResponse)
     }
   }
@@ -45,11 +47,15 @@ class NotificationController @Inject()(notificationService: NotificationService)
     req: Request => notificationService.markRead(req.params("id")).map(SuccessResponse)
   }
 
+  put("/notifications/:id/unread") {
+    req: Request => notificationService.markUnread(req.params("id")).map(SuccessResponse)
+  }
+
   put("/notifications/:receiver/receiver") {
     req: Request => notificationService.markReadAll(req.params("receiver")).map(SuccessResponse)
   }
 
   get("/notifications/:receiver/num_unread/:notify_type") {
-    req: Request => notificationService.getNumUnread(req.params("receiver"), req.params.get("notify_type"))
+    req: Request => notificationService.getNumUnread(req.params("receiver"), Some(NotificationType.IN_APP))
   }
 }

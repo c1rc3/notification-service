@@ -13,10 +13,54 @@
         <encoding>UTF-8</encoding>
         <scala.version>2.11.8</scala.version>
         <finatra.version>2.2.0</finatra.version>
+        <elasticsearch.version>2.4.0</elasticsearch.version>
+        <kafka.version>0.10.0.0</kafka.version>
 
         <mainClass>circe.ccp.notification.MainApp</mainClass>
     </properties>
     <dependencies>
+
+        <dependency>
+            <groupId>org.scalaj</groupId>
+            <artifactId>scalaj-http_2.11</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.7</version>
+        </dependency>
+
+        <!-- Elasticsearch -->
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>${elasticsearch.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.cakesolutions</groupId>
+            <artifactId>scala-kafka-client_2.11</artifactId>
+            <version>${kafka.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>log4j-over-slf4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <!-- Scala -->
         <dependency>
             <groupId>org.scala-lang</groupId>
