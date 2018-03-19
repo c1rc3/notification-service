@@ -28,8 +28,8 @@ case class EmailNotificationDeliverer @Inject()(
   }
 
   private def authenticator = {
-    val username = smtpConfig.getString("username")
-    val password = smtpConfig.getString("password")
+    val username = smtpConfig.getString("mail.smtp.username")
+    val password = smtpConfig.getString("mail.smtp.password")
     new Authenticator() {
       override protected def getPasswordAuthentication = new PasswordAuthentication(username, password)
     }
